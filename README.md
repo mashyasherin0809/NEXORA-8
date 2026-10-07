@@ -104,3 +104,43 @@ flowchart TD
     H -->|"Retries Exhausted"| R["Rollback"]
     H -->|"No Regression"| I["Test Generator: LLM"]
     I --> J["Evidence Report + Diff"]
+```
+
+---
+
+## 7. Quick Start & Execution
+
+### 1. Installation
+```bash
+git clone https://github.com/mashyasherin0809/NEXORA-8.git
+cd NEXORA-8
+pip install -r requirements.txt
+```
+
+### 2. Launch Agent Monitoring Web Dashboard & REST/SSE Server
+```bash
+python cli.py serve --port 5000
+```
+Open **http://localhost:5000** in your browser to access the complete interactive Agent Monitoring Dashboard, inspect live telemetry, analyze diffs, and view execution gates in real-time.
+
+### 3. Run Autonomous Repair via CLI
+```bash
+# Basic run in sandbox with evidence report
+python cli.py run --repo /path/to/target/repo --task "Fix negative total calculation in apply_discount"
+
+# Run with Gemini / OpenAI / Anthropic or offline heuristic
+python cli.py run --repo /path/to/target/repo --task "Fix calculation logic" --provider gemini --model gemini-2.5-flash
+
+# Automatically apply verified changes to original repo on 0 regressions
+python cli.py run --repo /path/to/target/repo --task "Fix pricing bug" --apply --output-report report.md
+```
+
+### 4. Run Streamlit Interactive UI
+```bash
+streamlit run ui.py
+```
+
+### 5. Run Test Suite
+```bash
+pytest -v
+```

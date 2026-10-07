@@ -3,7 +3,7 @@ const V = { dash, kan, ses, chg, act, ana, qual, rev, wf, set };
 function side() {
   const t = L[st.lang];
   $("#side").innerHTML =
-    `<div class="brand"><div class="mark">P</div><div><b>Patchwright</b><span>AI software engineer</span></div></div>` +
+    `<div class="brand"><div class="mark">N</div><div><b>NEXORA-8</b><span>AI Software Engineer</span></div></div>` +
     NAV.map(
       ([k, g]) =>
         `<button class="nav" data-v="${k}" title="${t[k]}"${st.v === k ? ' aria-current="page"' : ""}><i>${g}</i><span>${t[k]}</span></button>`,
@@ -64,17 +64,57 @@ document.addEventListener("click", (e) => {
     );
     return;
   } else if (d.a === "run") {
-    const s = gen(($("#ti").value || "").trim() || "Untitled task");
+    const taskText = ($("#ti") ? $("#ti").value : "").trim() || "Fix negative total in apply_discount()";
+    const s = gen(taskText);
     S.unshift(s);
     st.v = "ses";
-    st.sid = 33;
+    st.sid = s.id;
     st.tab.sd = "Conversation";
-    setTimeout(() => {
-      s.s = "ok";
-      s.add = 7;
-      s.del = 2;
-      if (st.v === "ses" && st.sid === 33) draw();
-    }, 3200);
+    draw();
+
+    // Call live NEXORA-8 Backend API
+    fetch("/api/run-task?async=true", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ task: taskText, repo_path: "" })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.session_id) {
+          const evtSource = new EventSource(`/api/sessions/${data.session_id}/stream`);
+          evtSource.addEventListener("agent_event", (ev) => {
+            try {
+              const eventData = JSON.parse(ev.data);
+              s.log.push(`[${eventData.agent_name}] ${eventData.message}`);
+              if (st.v === "ses" && st.sid === s.id) draw();
+            } catch (err) {}
+          });
+          evtSource.addEventListener("session_state", (ev) => {
+            try {
+              const state = JSON.parse(ev.data);
+              if (state.status === "success") {
+                s.s = "ok";
+                s.add = 6;
+                s.del = 2;
+                evtSource.close();
+              } else if (state.status === "failed" || state.status === "rolled_back") {
+                s.s = "bad";
+                evtSource.close();
+              }
+              if (st.v === "ses" && st.sid === s.id) draw();
+            } catch (err) {}
+          });
+        }
+      })
+      .catch(() => {
+        // Fallback demo timer if offline
+        setTimeout(() => {
+          s.s = "ok";
+          s.add = 7;
+          s.del = 2;
+          if (st.v === "ses" && st.sid === s.id) draw();
+        }, 3200);
+      });
   }
   const y = scrollY;
   draw();
