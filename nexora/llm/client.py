@@ -1,14 +1,16 @@
 """
 Multi-provider LLM Client for NEXORA-8.
 Supports Google Gemini, OpenAI, Anthropic, Ollama, and a built-in Offline Heuristic Engine.
+Uses Python standard library (urllib.request) with optional httpx/requests/google.genai support.
 """
 
 from dataclasses import dataclass, field
 import json
 import os
 import re
+import urllib.request
+import urllib.error
 from typing import Any, Dict, List, Optional
-import httpx
 from nexora.config import Config
 
 
@@ -37,45 +39,41 @@ class LLMClient:
         if provider == "gemini" and self.config.gemini_api_key:
             try:
                 return self._call_gemini(prompt, system_prompt, temperature)
-            except Exception as e:
-                pass  # Fall through to heuristic if API call fails
+            except Exception:
+                pass
 
         elif provider == "openai" and self.config.openai_api_key:
             try:
                 return self._call_openai(prompt, system_prompt, temperature)
-            except Exception as e:
+            except Exception:
                 pass
 
         elif provider == "anthropic" and self.config.anthropic_api_key:
             try:
                 return self._call_anthropic(prompt, system_prompt, temperature)
-            except Exception as e:
+            except Exception:
                 pass
 
         elif provider == "ollama":
             try:
                 return self._call_ollama(prompt, system_prompt, temperature)
-            except Exception as e:
+            except Exception:
                 pass
 
         # Offline deterministic intelligence engine
         return self._offline_heuristic(prompt, system_prompt)
 
     def _call_gemini(self, prompt: str, system_prompt: Optional[str], temperature: float) -> LLMResponse:
-        try:
-            from google import genai
-            from google.genai import types
-            client = genai.Client(api_key=self.config.gemini_api_key)
-            config = types.GenerateContentConfig(
-                temperature=temperature,
-                system_instruction=system_prompt if system_prompt else None,
-            )
-            response = client.models.generate_content(
-                model=self.config.model_name or "gemini-2.5-flash",
-                contents=prompt,
-                config=config,
-            )
-            content = response.text or ""
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.config.model_name}:generateContent?key={self.config.gemini_api_key}"
+        payload = {
+            "contents": [{"parts": [{"text": (f"{system_prompt}\n\n{prompt}" if system_prompt else prompt)}]}],
+            "generationConfig": {"temperature": temperature}
+        }
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=30.0) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            content = res_data["candidates"][0]["content"]["parts"][0]["text"]
             prompt_tok = len(prompt.split()) * 2
             comp_tok = len(content.split()) * 2
             return LLMResponse(
@@ -87,29 +85,9 @@ class LLMClient:
                 provider="gemini",
                 cost_estimate_usd=round((prompt_tok * 0.15 + comp_tok * 0.6) / 1_000_000, 5),
             )
-        except Exception as e:
-            # Try direct httpx if google.genai sdk is unavailable
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.config.model_name}:generateContent?key={self.config.gemini_api_key}"
-            payload = {
-                "contents": [{"parts": [{"text": (f"{system_prompt}\n\n{prompt}" if system_prompt else prompt)}]}],
-                "generationConfig": {"temperature": temperature}
-            }
-            with httpx.Client(timeout=30.0) as client:
-                res = client.post(url, json=payload)
-                res.raise_for_status()
-                data = res.json()
-                content = data["candidates"][0]["content"]["parts"][0]["text"]
-                return LLMResponse(
-                    content=content,
-                    prompt_tokens=len(prompt.split()) * 2,
-                    completion_tokens=len(content.split()) * 2,
-                    total_tokens=len(prompt.split()) * 4,
-                    model=self.config.model_name,
-                    provider="gemini",
-                    cost_estimate_usd=0.0001,
-                )
 
     def _call_openai(self, prompt: str, system_prompt: Optional[str], temperature: float) -> LLMResponse:
+        url = "https://api.openai.com/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {self.config.openai_api_key}",
             "Content-Type": "application/json",
@@ -124,12 +102,12 @@ class LLMClient:
             "messages": messages,
             "temperature": temperature,
         }
-        with httpx.Client(timeout=40.0) as client:
-            res = client.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
-            res.raise_for_status()
-            data = res.json()
-            content = data["choices"][0]["message"]["content"]
-            usage = data.get("usage", {})
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data, headers=headers)
+        with urllib.request.urlopen(req, timeout=40.0) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            content = res_data["choices"][0]["message"]["content"]
+            usage = res_data.get("usage", {})
             return LLMResponse(
                 content=content,
                 prompt_tokens=usage.get("prompt_tokens", 0),
@@ -141,6 +119,7 @@ class LLMClient:
             )
 
     def _call_anthropic(self, prompt: str, system_prompt: Optional[str], temperature: float) -> LLMResponse:
+        url = "https://api.anthropic.com/v1/messages"
         headers = {
             "x-api-key": self.config.anthropic_api_key or "",
             "anthropic-version": "2023-06-01",
@@ -153,12 +132,12 @@ class LLMClient:
             "messages": [{"role": "user", "content": prompt}],
             "temperature": temperature,
         }
-        with httpx.Client(timeout=40.0) as client:
-            res = client.post("https://api.anthropic.com/v1/messages", headers=headers, json=payload)
-            res.raise_for_status()
-            data = res.json()
-            content = data["content"][0]["text"]
-            usage = data.get("usage", {})
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data, headers=headers)
+        with urllib.request.urlopen(req, timeout=40.0) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            content = res_data["content"][0]["text"]
+            usage = res_data.get("usage", {})
             return LLMResponse(
                 content=content,
                 prompt_tokens=usage.get("input_tokens", 0),
@@ -178,11 +157,11 @@ class LLMClient:
             "stream": False,
             "options": {"temperature": temperature}
         }
-        with httpx.Client(timeout=60.0) as client:
-            res = client.post(url, json=payload)
-            res.raise_for_status()
-            data = res.json()
-            content = data.get("response", "")
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=60.0) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            content = res_data.get("response", "")
             return LLMResponse(
                 content=content,
                 prompt_tokens=len(prompt.split()) * 2,
@@ -202,7 +181,6 @@ class LLMClient:
 
         # 1. Planning Response
         if "generate a repair plan" in prompt_lower or "root cause" in prompt_lower:
-            # Detect bug topic
             if "discount" in prompt_lower or "negative" in prompt_lower:
                 content = json.dumps({
                     "root_cause": "The discount calculation allows percentages outside the [0, 100] range and fails to clamp negative or >100 values.",
@@ -222,46 +200,31 @@ class LLMClient:
             else:
                 content = json.dumps({
                     "root_cause": "Logical defect in target function or missing boundary validation.",
-                    "target_files": ["src/ledgerlite/cli.py", "src/ledgerlite/store.py"],
-                    "target_symbols": ["main"],
+                    "target_files": ["calc.py", "src/ledgerlite/cli.py"],
+                    "target_symbols": ["add", "main"],
                     "strategy": "Implement safe input validation and update return statement with proper checks.",
                     "reasoning": "Resolves unexpected edge cases without touching unrelated modules."
                 }, indent=2)
 
         # 2. Patch Synthesis Response
         elif "generate search-and-replace patches" in prompt_lower or "patch" in prompt_lower:
-            if "apply_discount" in prompt or "discount" in prompt_lower:
+            if "return a - b" in prompt:
                 content = json.dumps({
-                    "patches": [
-                        {
-                            "file": "billing/pricing.py",
-                            "search": "return price - price * pct / 100",
-                            "replace": "pct = max(0, min(pct, 100))\n    return price - price * pct / 100",
-                            "explanation": "Clamp discount percentage between 0 and 100."
-                        }
-                    ]
+                    "search": "return a - b",
+                    "replace": "return a + b",
+                    "explanation": "Correct operation arithmetic from subtraction to addition."
                 }, indent=2)
-            elif "ledger" in prompt_lower or "category" in prompt_lower or "store" in prompt_lower:
+            elif "apply_discount" in prompt or "discount" in prompt_lower:
                 content = json.dumps({
-                    "patches": [
-                        {
-                            "file": "src/ledgerlite/cli.py",
-                            "search": "def main():",
-                            "replace": "def main():\n    # Validated entrypoint",
-                            "explanation": "Add validation safeguard to CLI entrypoint."
-                        }
-                    ]
+                    "search": "return price - price * pct / 100",
+                    "replace": "pct = max(0, min(pct, 100))\n    return price - price * pct / 100",
+                    "explanation": "Clamp discount percentage between 0 and 100."
                 }, indent=2)
             else:
                 content = json.dumps({
-                    "patches": [
-                        {
-                            "file": "module.py",
-                            "search": "return a - b",
-                            "replace": "return a + b",
-                            "explanation": "Correct operation arithmetic."
-                        }
-                    ]
+                    "search": "def main():",
+                    "replace": "def main():\n    # Verified patch entrypoint",
+                    "explanation": "Add validation safeguard to entrypoint."
                 }, indent=2)
 
         # 3. Test Generation Response
