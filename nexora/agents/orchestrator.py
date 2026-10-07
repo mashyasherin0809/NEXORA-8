@@ -94,7 +94,12 @@ class OrchestratorAgent(BaseAgent):
         # Specialized Sub-Agents
         self.locator = LocatorAgent()
         self.planner = PlannerAgent(self.llm_client)
-        self.patcher = PatcherAgent(self.llm_client)
+        self.patcher = PatcherAgent(
+            self.llm_client,
+            max_diff_lines=self.config.max_diff_lines,
+            max_changed_files=getattr(self.config, "max_changed_files", 5),
+            max_added_lines=getattr(self.config, "max_added_lines", 80),
+        )
         self.verifier = VerifierAgent()
         self.test_gen = TestGenAgent(self.llm_client)
 
@@ -148,6 +153,12 @@ class OrchestratorAgent(BaseAgent):
             if progress_callback:
                 progress_callback("Indexing AST codebase...", 0.35)
             repo_index, candidates = self.locator.run(sandbox_dir, task_description)
+            self.log(
+                "Retrieval evidence: " + "; ".join(
+                    f"{c.relative_path} score={c.score} terms={','.join(c.matched_terms[:5])}"
+                    for c in candidates[:5]
+                )
+            )
             guard = HallucinationGuard(known_repo_modules=repo_index.all_known_modules, max_diff_lines=self.config.max_diff_lines)
 
             # 4. Planning Phase

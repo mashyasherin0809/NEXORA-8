@@ -19,6 +19,8 @@ class VerifierAgent(BaseAgent):
         self.set_status(AgentStatus.WORKING, "Executing baseline test suite...")
         res = runner.run_tests()
         self.log(f"Baseline test run: {res.passed_count} passed, {res.failed_count} failed, {res.error_count} error(s).")
+        if res.no_tests:
+            self.log("WARNING: Repository has no discoverable tests; confidence is reduced and acceptance coverage is required.")
         self.set_status(AgentStatus.COMPLETED, f"Baseline captured ({res.passed_count}/{res.total_tests} passed).")
         return res
 

@@ -39,6 +39,7 @@ class TestResult:
     raw_output: str = ""
     timed_out: bool = False
     return_code: int = 0
+    no_tests: bool = False
 
     def to_dict(self) -> Dict:
         return {
@@ -51,6 +52,7 @@ class TestResult:
             "duration": round(self.duration, 2),
             "timed_out": self.timed_out,
             "return_code": self.return_code,
+            "no_tests": self.no_tests,
             "test_cases": [
                 {
                     "nodeid": tc.nodeid,
@@ -172,7 +174,8 @@ class TestRunner:
                 skipped_count = int(m_skip.group(1))
 
         total_tests = passed_count + failed_count + error_count + skipped_count
-        overall_passed = (return_code == 0) and (failed_count == 0) and (error_count == 0) and not timed_out
+        no_tests = total_tests == 0
+        overall_passed = (return_code == 0) and not no_tests and (failed_count == 0) and (error_count == 0) and not timed_out
 
         # Extract failure tracebacks
         failures_section = ""
@@ -195,4 +198,5 @@ class TestRunner:
             raw_output=output,
             timed_out=timed_out,
             return_code=return_code,
+            no_tests=no_tests,
         )

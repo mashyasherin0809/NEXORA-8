@@ -18,6 +18,8 @@ class VerificationVerdict:
     baseline_passed_count: int = 0
     final_passed_count: int = 0
     total_suite_count: int = 0
+    baseline_failures: List[str] = field(default_factory=list)
+    unchanged_failures: List[str] = field(default_factory=list)
     message: str = ""
 
     def to_dict(self) -> Dict:
@@ -30,6 +32,8 @@ class VerificationVerdict:
             "baseline_passed_count": self.baseline_passed_count,
             "final_passed_count": self.final_passed_count,
             "total_suite_count": self.total_suite_count,
+            "baseline_failures": self.baseline_failures,
+            "unchanged_failures": self.unchanged_failures,
             "message": self.message,
         }
 
@@ -56,15 +60,21 @@ class RegressionDetector:
         # Newly passing tests (e.g. from generated acceptance tests)
         new_passed = sorted(list(post_passed - baseline_passed))
 
+        baseline_failures = sorted(baseline.failed_test_ids)
+        unchanged_failures = sorted(set(baseline.failed_test_ids).intersection(post_patch.failed_test_ids))
         has_regressions = len(total_regressions) > 0
-        is_verified = (not has_regressions) and (post_patch.failed_count == 0)
+        # Existing failures are recorded, not treated as regressions. A patch is
+        # safe when it preserves all baseline-passing tests and introduces no new failure.
+        newly_failed = set(post_patch.failed_test_ids) - set(baseline.failed_test_ids)
+        is_verified = (not has_regressions) and (not newly_failed) and post_patch.return_code == 0
 
         if has_regressions:
             message = f"CRITICAL REGRESSION DETECTED: {len(total_regressions)} previously passing test(s) failed after patch: {', '.join(total_regressions[:3])}"
         elif fixed_tests:
             message = f"VERIFICATION SUCCESS: Fixed {len(fixed_tests)} test(s) with 0 regressions ({post_patch.passed_count}/{post_patch.total_tests} passing)."
         else:
-            message = f"VERIFICATION SUCCESS: 0 regressions ({post_patch.passed_count}/{post_patch.total_tests} passing)."
+            suffix = f"; {len(unchanged_failures)} pre-existing failure(s) unchanged" if unchanged_failures else ""
+            message = f"VERIFICATION SUCCESS: 0 regressions ({post_patch.passed_count}/{post_patch.total_tests} passing){suffix}."
 
         return VerificationVerdict(
             is_verified=is_verified,
@@ -75,5 +85,7 @@ class RegressionDetector:
             baseline_passed_count=baseline.passed_count,
             final_passed_count=post_patch.passed_count,
             total_suite_count=post_patch.total_tests,
+            baseline_failures=baseline_failures,
+            unchanged_failures=unchanged_failures,
             message=message,
         )

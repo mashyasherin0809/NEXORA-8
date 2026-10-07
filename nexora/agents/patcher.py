@@ -28,9 +28,12 @@ class GeneratedPatch:
 class PatcherAgent(BaseAgent):
     """Synthesizes targeted, minimal code modifications."""
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(self, llm_client: LLMClient, max_diff_lines: int = 120, max_changed_files: int = 5, max_added_lines: int = 80):
         super().__init__(name="Patcher", role_description="Synthesizes targeted minimal diffs and patches")
         self.llm_client = llm_client
+        self.max_diff_lines = max_diff_lines
+        self.max_changed_files = max_changed_files
+        self.max_added_lines = max_added_lines
 
     def patch(
         self,
@@ -43,7 +46,11 @@ class PatcherAgent(BaseAgent):
 
         results: List[GeneratedPatch] = []
 
-        for target_file in plan.target_files:
+        if len(plan.target_files) > self.max_changed_files:
+            self.log(f"Patch rejected: {len(plan.target_files)} target files exceeds limit {self.max_changed_files}.")
+            return results
+
+        for target_file in plan.target_files[:self.max_changed_files]:
             try:
                 original_content = sandbox.read_file(target_file)
             except Exception as e:
@@ -102,16 +109,24 @@ CRITICAL RULES:
             if search_str and search_str in original_content:
                 new_content = original_content.replace(search_str, replace_str, 1)
                 patch_obj.diff_text = self._make_diff(original_content, new_content, target_file)
-                sandbox.write_file(target_file, new_content)
-                patch_obj.success = True
-                self.log(f"Successfully applied patch to {target_file}: {explanation}")
+                if self._within_budget(patch_obj.diff_text):
+                    sandbox.write_file(target_file, new_content)
+                    patch_obj.success = True
+                    self.log(f"Successfully applied patch to {target_file}: {explanation}")
+                else:
+                    patch_obj.error = "Minimal-change policy rejected patch size."
+                    self.log(f"Rejected oversized patch for {target_file}")
             else:
                 # Fuzzy fallback if exact whitespace was slightly off
                 applied, new_content = self._fuzzy_replace(original_content, search_str, replace_str)
                 if applied:
                     patch_obj.diff_text = self._make_diff(original_content, new_content, target_file)
-                    sandbox.write_file(target_file, new_content)
-                    patch_obj.success = True
+                    patch_obj.diff_text = self._make_diff(original_content, new_content, target_file)
+                    if self._within_budget(patch_obj.diff_text):
+                        sandbox.write_file(target_file, new_content)
+                        patch_obj.success = True
+                    else:
+                        patch_obj.error = "Minimal-change policy rejected patch size."
                     self.log(f"Fuzzy-matched and applied patch to {target_file}")
                 else:
                     patch_obj.success = False
@@ -125,6 +140,12 @@ CRITICAL RULES:
             f"Generated {len(results)} patch(es).",
         )
         return results
+
+    def _within_budget(self, diff_text: str) -> bool:
+        lines = diff_text.splitlines()
+        added = sum(1 for line in lines if line.startswith("+") and not line.startswith("+++"))
+        changed = sum(1 for line in lines if line.startswith(("+", "-")) and not line.startswith(("+++", "---")))
+        return changed <= self.max_diff_lines and added <= self.max_added_lines
 
     def _make_diff(self, old_text: str, new_text: str, filename: str) -> str:
         diff_lines = difflib.unified_diff(

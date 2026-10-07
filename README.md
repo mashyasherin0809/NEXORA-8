@@ -143,4 +143,24 @@ streamlit run ui.py
 ### 5. Run Test Suite
 ```bash
 pytest -v
-```
+```
+
+## 8. RepoPilot Console
+
+RepoPilot is the current FastAPI + React product surface for the same verified-agent engine.
+
+```bash
+# Terminal 1: API and SSE server
+uvicorn nexora.server.fastapi_app:app --reload --port 8000
+
+# Terminal 2: React/Vite console
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`. The console accepts a local repository path or Git URL and streams each run through the intake, analysis, baseline, planning, patch, and verification stages. Run history is persisted in SQLite (`repopilot.db` by default), and isolated workspaces are created under the system temporary directory.
+
+The adapter contract lives in `nexora/analyzer/language_adapter.py`. Maven/Java runs use `mvn -q test` and JUnit-oriented repository analysis; Python uses the existing AST indexer and autonomous repair orchestrator; Node/npm is defined as the extension point for Jest execution.
+
+Configure `LLM_PROVIDER`, `LLM_API_KEY`, and `LLM_MODEL` for provider-backed repair planning. Without credentials, RepoPilot still performs repository intake, structural analysis, and deterministic baseline evidence before reporting that patch synthesis needs configuration.

@@ -56,12 +56,21 @@ class SandboxRunner:
         """Write modified content to sandbox file, saving snapshot for rollback."""
         if not self.sandbox_dir:
             raise RuntimeError("Sandbox not initialized. Call setup() first.")
-        full_path = os.path.join(self.sandbox_dir, rel_path)
+        normalized = os.path.normpath(rel_path).replace("\\", "/")
+        if normalized.startswith("../") or normalized == "..":
+            raise ValueError(f"Unsafe path outside sandbox: {rel_path}")
+        full_path = os.path.join(self.sandbox_dir, normalized)
+
+        # Existing tests are evidence, not an edit surface. New generated test
+        # files are allowed, but overwriting or deleting a repository test is not.
+        is_test = normalized.startswith(("tests/", "test/")) or "/tests/" in normalized or "/test/" in normalized
+        if is_test and os.path.exists(full_path) and normalized not in self._initial_file_snapshots:
+            raise PermissionError(f"PROTECTED TEST FILE: existing test cannot be modified: {normalized}")
         
         # Save snapshot on first write
-        if rel_path not in self._initial_file_snapshots and os.path.exists(full_path):
+        if normalized not in self._initial_file_snapshots and os.path.exists(full_path):
             with open(full_path, "r", encoding="utf-8", errors="replace") as f:
-                self._initial_file_snapshots[rel_path] = f.read()
+                self._initial_file_snapshots[normalized] = f.read()
 
         os.makedirs(os.path.dirname(full_path), exist_ok=True)
         with open(full_path, "w", encoding="utf-8") as f:
