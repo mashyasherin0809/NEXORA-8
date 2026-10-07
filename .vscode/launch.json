@@ -1,0 +1,40 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "NEXORA-8: Web Dashboard Server (Port 5000)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/cli.py",
+            "args": ["serve", "--port", "5000"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "NEXORA-8: Streamlit UI",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "streamlit",
+            "args": ["run", "${workspaceFolder}/ui.py"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "NEXORA-8: CLI Repair Demo",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/cli.py",
+            "args": ["run", "--repo", "${workspaceFolder}", "--task", "Fix calculation logic"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "NEXORA-8: Run Pytest Suite",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": ["-v"],
+            "console": "integratedTerminal"
+        }
+    ]
+}
