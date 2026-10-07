@@ -1,0 +1,118 @@
+/* PAGE: Sessions (sidebar item "Sessions")
+   Session list, session detail tabs (Agents, Conversation, Timeline, Report). Sample sessions are in sessions-data.js.
+   Styles used only by this page. */
+.sess {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 4px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  width: 100%;
+  background: none;
+  text-align: left;
+}
+.sess:hover {
+  background: var(--accbg);
+}
+.sess .t {
+  flex: 1;
+  min-width: 0;
+}
+.sess .t b {
+  display: block;
+  font-weight: 600;
+}
+.sess .t span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.ic {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  flex: none;
+}
+.ic.ok {
+  background: var(--okbg);
+  color: var(--ok);
+}
+.ic.bad {
+  background: var(--badbg);
+  color: var(--bad);
+}
+.ic.run {
+  background: var(--accbg);
+  color: var(--acc);
+}
+.pm {
+  font:
+    12px ui-monospace,
+    Menlo,
+    Consolas,
+    monospace;
+  white-space: nowrap;
+}
+.badge {
+  font-size: 12px;
+  padding: 2px 9px;
+  border-radius: 99px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.b-ok {
+  background: var(--okbg);
+  color: var(--ok);
+}
+.b-bad {
+  background: var(--badbg);
+  color: var(--bad);
+}
+.b-run {
+  background: var(--accbg);
+  color: var(--acc);
+}
+.blk {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  font:
+    12px/1.6 ui-monospace,
+    Menlo,
+    Consolas,
+    monospace;
+}
+.blk header {
+  padding: 4px 10px;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  display: flex;
+  justify-content: space-between;
+}
+.rm header {
+  background: var(--badbg);
+  color: var(--bad);
+}
+.ad header {
+  background: var(--okbg);
+  color: var(--ok);
+}
+.blk pre {
+  margin: 0;
+  padding: 8px 10px;
+  background: var(--code);
+  overflow-x: auto;
+}
+.blk pre span {
+  display: block;
+}
+.blk pre span::before {
+  content: attr(data-n);
+  display: inline-block;
+  width: 2.2em;
+  color: var(--muted);
+}

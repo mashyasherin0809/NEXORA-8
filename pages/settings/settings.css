@@ -1,0 +1,10 @@
+/* PAGE: Settings (sidebar item "Settings")
+   Safeguard switches, limits and the theme buttons.
+   Styles used only by this page. */
+.sw {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}

@@ -1,0 +1,88 @@
+/* Design tokens: colours for dark and light, reset, typography */
+:root {
+  --bg: #0b0e14;
+  --side: #10141c;
+  --card: #131823;
+  --line: #222a3a;
+  --fg: #e6eaf2;
+  --muted: #8794ad;
+  --acc: #8b7cff;
+  --accbg: #8b7cff22;
+  --ok: #3ecf8e;
+  --okbg: #3ecf8e1c;
+  --bad: #ff6b6b;
+  --badbg: #ff6b6b1c;
+  --warn: #f5b84b;
+  --code: #0d1119;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f3f5f9;
+    --side: #fff;
+    --card: #fff;
+    --line: #dde2ec;
+    --fg: #111827;
+    --muted: #5d6a82;
+    --acc: #5b45e6;
+    --accbg: #5b45e61a;
+    --ok: #12805a;
+    --okbg: #12805a16;
+    --bad: #c62828;
+    --badbg: #c6282814;
+    --warn: #a96a00;
+    --code: #f6f8fb;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f3f5f9;
+  --side: #fff;
+  --card: #fff;
+  --line: #dde2ec;
+  --fg: #111827;
+  --muted: #5d6a82;
+  --acc: #5b45e6;
+  --accbg: #5b45e61a;
+  --ok: #12805a;
+  --okbg: #12805a16;
+  --bad: #c62828;
+  --badbg: #c6282814;
+  --warn: #a96a00;
+  --code: #f6f8fb;
+}
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font:
+    14px/1.5 system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}

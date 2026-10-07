@@ -1,0 +1,49 @@
+/* PAGE: Change Analyzer (sidebar item "Change Analyzer")
+   change-analyzer.js = page layout and report display. change-analyzer-engine.js = the checks, scoring and Markdown report.
+   Styles used only by this page. */
+.code {
+  width: 100%;
+  min-height: 220px;
+  background: var(--code);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--fg);
+  padding: 8px;
+  font:
+    12px/1.5 ui-monospace,
+    Menlo,
+    Consolas,
+    monospace;
+  resize: vertical;
+}
+.sv {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 99px;
+  font-weight: 600;
+}
+.sv.high {
+  background: var(--badbg);
+  color: var(--bad);
+}
+.sv.med {
+  background: #f5b84b22;
+  color: var(--warn);
+}
+.sv.low {
+  background: var(--accbg);
+  color: var(--acc);
+}
+.ban {
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border: 1px solid currentColor;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.ban b {
+  font-size: 20px;
+}

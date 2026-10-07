@@ -1,0 +1,17 @@
+/* PAGE: Kanban Board (sidebar item "Kanban Board")
+   The five columns (Queued, Running, In review, Done, Blocked) and their cards.
+   Styles used only by this page. */
+.kan {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(170px, 1fr));
+  gap: 12px;
+  overflow-x: auto;
+}
+.kc {
+  background: var(--code);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}

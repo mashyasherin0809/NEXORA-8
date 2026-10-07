@@ -1,0 +1,21 @@
+/* PAGE: Dashboard (sidebar item "Dashboard")
+   Task box, headline stats, agent health, charts, recent sessions, patch-acceptance numbers.
+   Styles used only by this page. */
+.task textarea {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  resize: none;
+  min-height: 44px;
+  outline: none;
+}
+.hb {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.hb i {
+  display: block;
+}

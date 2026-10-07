@@ -1,0 +1,106 @@
+/* Page layout: app grid, sidebar, navigation, main area */
+.app {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  min-height: 100vh;
+}
+.app.col {
+  grid-template-columns: 64px 1fr;
+}
+aside {
+  background: var(--side);
+  border-right: 1px solid var(--line);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 2px 6px 14px;
+}
+.mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accbg);
+  color: var(--acc);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  flex: none;
+}
+.brand span {
+  color: var(--muted);
+  font-size: 12px;
+  display: block;
+}
+.nav {
+  background: none;
+  border: 0;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--muted);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.nav i {
+  font-style: normal;
+  width: 18px;
+  text-align: center;
+  flex: none;
+}
+.nav:hover {
+  color: var(--fg);
+}
+.nav[aria-current="page"] {
+  background: var(--accbg);
+  color: var(--fg);
+  box-shadow: inset 0 0 0 1px var(--acc);
+}
+.col .nav span,
+.col .brand div:last-child,
+.col .side-x {
+  display: none;
+}
+.side-x {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.seg {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.seg button {
+  flex: 1;
+  border: 0;
+  background: none;
+  padding: 5px;
+  color: var(--muted);
+}
+.seg button[aria-pressed="true"] {
+  background: var(--accbg);
+  color: var(--fg);
+}
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+  margin-right: 6px;
+}
+main {
+  padding: 20px 24px;
+  min-width: 0;
+}

@@ -1,0 +1,34 @@
+/* Phone and tablet rules */
+@media (max-width: 900px) {
+  .app,
+  .app.col {
+    grid-template-columns: 1fr;
+  }
+  aside {
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand div:last-child,
+  .side-x {
+    display: none;
+  }
+  .nav span {
+    display: inline !important;
+  }
+  .g4,
+  .g3 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .g21,
+  .g2 {
+    grid-template-columns: 1fr;
+  }
+  main {
+    padding: 14px;
+  }
+  .nav {
+    white-space: nowrap;
+  }
+}

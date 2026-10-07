@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Patchwright Agent Dashboard</title>
+    <!-- Shared styles first, then one stylesheet per sidebar page, then responsive rules last -->
+    <link rel="stylesheet" href="shared/css/theme.css" />
+    <link rel="stylesheet" href="shared/css/layout.css" />
+    <link rel="stylesheet" href="shared/css/components.css" />
+    <link rel="stylesheet" href="pages/dashboard/dashboard.css" />
+    <link rel="stylesheet" href="pages/kanban-board/kanban-board.css" />
+    <link rel="stylesheet" href="pages/sessions/sessions.css" />
+    <link rel="stylesheet" href="pages/change-analyzer/change-analyzer.css" />
+    <link rel="stylesheet" href="pages/activity-feed/activity-feed.css" />
+    <link rel="stylesheet" href="pages/analytics/analytics.css" />
+    <link rel="stylesheet" href="pages/code-quality/code-quality.css" />
+    <link rel="stylesheet" href="pages/reviews/reviews.css" />
+    <link rel="stylesheet" href="pages/workflows/workflows.css" />
+    <link rel="stylesheet" href="pages/settings/settings.css" />
+    <link rel="stylesheet" href="shared/css/responsive.css" />
+  </head>
+  <body>
+    <div class="app" id="app">
+      <aside id="side"></aside>
+      <main id="main"></main>
+    </div>
+    <!-- Shared code, then each page, then app.js (keep this order) -->
+    <script src="shared/js/core.js"></script>
+    <script src="shared/js/i18n.js"></script>
+    <script src="shared/js/state.js"></script>
+    <script src="shared/js/ui.js"></script>
+    <script src="pages/sessions/sessions-data.js"></script>
+    <script src="pages/change-analyzer/change-analyzer-engine.js"></script>
+    <script src="pages/dashboard/dashboard.js"></script>
+    <script src="pages/kanban-board/kanban-board.js"></script>
+    <script src="pages/sessions/sessions.js"></script>
+    <script src="pages/change-analyzer/change-analyzer.js"></script>
+    <script src="pages/activity-feed/activity-feed.js"></script>
+    <script src="pages/analytics/analytics.js"></script>
+    <script src="pages/code-quality/code-quality.js"></script>
+    <script src="pages/reviews/reviews.js"></script>
+    <script src="pages/workflows/workflows.js"></script>
+    <script src="pages/settings/settings.js"></script>
+    <script src="shared/js/app.js"></script>
+  </body>
+</html>
