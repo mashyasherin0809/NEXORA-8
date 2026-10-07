@@ -1,33 +1,9 @@
-# NEXORA-8: Proof-Carrying AI Software Engineering Agent
+# NEXORA-8: AI Software Engineering Agent
 
 An AI software engineering agent that reads an existing Python codebase, fixes bugs or adds small features, and verifies that the changes do not introduce regressions by comparing test results before and after the modification.
 
 Built for **HackNex 2026 (Internal Qualifier)** under **Problem Statement HNX26PSI09: AI Software Engineering Agent**, Division of Computer Science and Engineering, Karunya Institute of Technology and Sciences.
 
----
-
-## Table of Contents
-
-1. [Problem Statement](#1-problem-statement)
-2. [Project Overview](#2-project-overview)
-3. [Objectives](#3-objectives)
-4. [Proposed Solution](#4-proposed-solution)
-5. [Key Features](#5-key-features)
-6. [System Architecture](#6-system-architecture)
-7. [System Workflow](#7-system-workflow)
-8. [Technology Stack](#8-technology-stack)
-9. [AI/ML Methodology](#9-aiml-methodology)
-10. [Dataset](#10-dataset)
-11. [Project Structure](#11-project-structure)
-12. [Installation](#12-installation)
-13. [Usage](#13-usage)
-14. [Results and Evaluation](#14-results-and-evaluation)
-15. [Expected Outcome](#15-expected-outcome)
-16. [Future Scope](#16-future-scope)
-17. [Team Members](#17-team-members)
-18. [Project Status](#18-project-status)
-
----
 
 ## 1. Problem Statement
 
